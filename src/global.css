@@ -1,0 +1,11 @@
+body {
+  background: linear-gradient(
+      150deg,
+      rgba(255, 255, 255, 0.3) 0%,
+      rgba(0, 0, 0, 0.1) 100%
+    ),
+    url("../assets/fuzz.png"), #dfff4f;
+  background-repeat: "repeat";
+  min-height: "100vh";
+  min-width: "100vw";
+}
