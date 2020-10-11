@@ -21,5 +21,5 @@ jobs:
       with:
         GITHUB_TOKEN: ${{ secrets.GH_DEPLOYMENT_TOKEN }}
         BRANCH: gh-pages
-        FOLDER: client-app/dist
+        FOLDER: dist
         CLEAN: true
