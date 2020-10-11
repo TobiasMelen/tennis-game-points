@@ -1,0 +1,27 @@
+name: Deploy to GitHub Pages
+on:
+  push:
+    branches:
+      - master
+    paths:
+      - client-app/**
+jobs:
+  build-and-deploy:
+    runs-on: ubuntu-latest
+    steps:
+    - name: Checkout
+      uses: actions/checkout@v2
+      with:
+          persist-credentials: false
+
+    - name: Install and build
+      run: |
+        yarn install
+        yarn run parcel build src/index.html --public-url /${{ github.event.repository.name }}/
+    - name: Deploy
+      uses: JamesIves/github-pages-deploy-action@3.6.2
+      with:
+        GITHUB_TOKEN: ${{ secrets.GH_DEPLOYMENT_TOKEN }}
+        BRANCH: gh-pages
+        FOLDER: client-app/dist
+        CLEAN: true
