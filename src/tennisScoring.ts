@@ -22,10 +22,20 @@ export type Player = keyof GameState;
 //end typings, runtime js below.
 
 /** Validate that game is ongoing and remove "GAME" as possible score value */
-export const isGameOngoing = (
+const isGameOngoing = (
   gameState: GameState
 ): gameState is OngoingGameState =>
   Object.values(gameState).every((score) => score !== "GAME");
+
+export const getGameStatus = (gameState: GameState) => {
+  if (!isGameOngoing(gameState)) {
+    return "GAME_OVER";
+  }
+  if (Object.values(gameState).every((score) => score === 0)) {
+    return "NOT_STARTED";
+  }
+  return "ONGOING";
+};
 
 /** Get opponent role for player, this func is banking it on 3 person tennis never happening */
 export const opponentOf = (player: Player): Player =>
@@ -76,6 +86,41 @@ export const pointWonBy = (gameState: GameState, player: Player) => {
   }
 };
 
+const translations: { [score in GameScore]: string } = {
+  0: "love",
+  15: "fifteen",
+  30: "thirty",
+  40: "forty",
+  AD: "advantage",
+  GAME: "game",
+};
+
+const individualPresentationScores: GameScore[] = ["GAME", "AD"];
+
+export const score = (gameState: GameState) => {
+  //Score to be presented as "score" all...
+  if (gameState.Server === gameState.Receiver) {
+    //...if not love all, where we'll stay quiet...
+    return gameState.Server === 0
+      ? ""
+      : //...or deuce, where we'll say "Deuce"
+      gameState.Server === 40
+      ? "deuce"
+      : `${translations[gameState.Server]} all`;
+  }
+  //If score where only one player is to be presented
+  const [player, score] =
+    Object.entries(gameState).find(
+      ([, score]) => individualPresentationScores.indexOf(score) !== -1
+    ) ?? [];
+  if (player && score) {
+    return `${translations[score]}, ${player.toLowerCase()}`;
+  }
+  return `${translations[gameState.Server]} ${
+    translations[gameState.Receiver]
+  }`;
+};
+
 //Stateful class implementation which I will never use for anything
 export class TennisGame {
   #gamestate: GameState;
@@ -84,5 +129,8 @@ export class TennisGame {
   }
   pointWonBy(player: Player) {
     this.#gamestate = pointWonBy(this.#gamestate, player);
+  }
+  score() {
+    return score(this.#gamestate);
   }
 }

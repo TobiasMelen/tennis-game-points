@@ -7,7 +7,7 @@ import {
 } from "react";
 
 //this might be a bit much
-//Cheating a lot with dep arrays, but hey, what's life without thrills
+//Cheating a lot with dep arrays, but hey
 export default function useResettableReducer<R extends Reducer<any, any>>(
   reducer: R,
   initialState: ReducerState<R>

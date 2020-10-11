@@ -1,11 +1,7 @@
-import React, { ElementType, useEffect, useMemo } from "react";
-import {
-  CSSProperties,
-  PropsWithChildren,
-  useState,
-} from "react";
+import React, { ElementType, useEffect, useLayoutEffect, useMemo } from "react";
+import { CSSProperties, PropsWithChildren, useState } from "react";
 
-type Props = {
+type Input = {
   goingInStyle?: CSSProperties;
   goingOutStyle?: CSSProperties;
   transitionTime: number;
@@ -13,15 +9,11 @@ type Props = {
 
 export default function transitionChildren<
   InnerProps extends PropsWithChildren<{ style?: CSSProperties }>
->(Component: ElementType<InnerProps>) {
-  return ({
-    children,
-    style,
-    goingInStyle,
-    goingOutStyle,
-    transitionTime,
-    ...props
-  }: InnerProps & Props) => {
+>(
+  Component: ElementType<InnerProps>,
+  { goingInStyle, goingOutStyle, transitionTime }: Input
+) {
+  return ({ children, style, ...props }: InnerProps) => {
     const [renderChildren, setRenderChildren] = useState(children);
     const [replacingChildren, setReplacingChildren] = useState(false);
     useEffect(() => {

@@ -4,7 +4,9 @@
   max-width: 800px;
   display: flex;
   flex-direction: column;
-  justify-content: center;
+  justify-content: space-between;
   text-align: center;
   margin: 0 auto;
+  padding: 20;
+  box-sizing: border-box;
 }

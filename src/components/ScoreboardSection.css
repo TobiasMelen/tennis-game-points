@@ -1,0 +1,25 @@
+.scoreboardSection {
+  background-clip: text;
+  -webkit-background-clip: text;
+  color: transparent;
+  font-size: 10em;
+  text-shadow: 3px 3px 3px white;
+  background-color: #aaa;
+  font-weight: 900;
+  font-family: monospace;
+  -webkit-text-stroke: 1px #eee;
+  transition: opacity 100ms linear, transform 100ms ease-out;
+  user-select: none;
+}
+
+@media (min-width: 450px) {
+  .scoreboardSection {
+    font-size: 15em;
+  }
+}
+
+@media (min-width: 700px) {
+  .scoreboardSection {
+    font-size: 25em;
+  }
+}

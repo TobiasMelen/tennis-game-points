@@ -5,6 +5,7 @@ import {
   opponentOf,
   Player,
   pointWonBy,
+  score,
 } from "./tennisScoring";
 
 //Opponent brainfart tests
@@ -37,8 +38,9 @@ for (const player of ["Server", "Receiver"] as const) {
   ) =>
     test(`${currentScore} score is incremented to ${expectedScore} for player ${player}`, (t) => {
       const score = playerPointWinAt(currentScore, 0);
-      t.assert(
-        score[player] === expectedScore,
+      t.is(
+        score[player],
+        expectedScore,
         `Scoring point at "${currentScore}" should result in "${expectedScore}" score`
       );
     });
@@ -51,7 +53,7 @@ for (const player of ["Server", "Receiver"] as const) {
 
   test(`Scoring at 40 with other player at 40 results in advantage (AD) for player ${player}`, (t) => {
     const score = playerPointWinAt(40, 40);
-    t.assert(score[player] === "AD");
+    t.is(score[player], "AD");
   });
 
   test(`Scoring by player ${player} at 40 with other player in advantage results in deuce (40, 40)`, (t) => {
@@ -64,3 +66,18 @@ for (const player of ["Server", "Receiver"] as const) {
     t.throws(() => playerPointWinAt(0, "GAME"));
   });
 }
+
+//Score presentaion tests
+test("Scores are presented in correct order", (t) => {
+  t.is(score({ Server: 30, Receiver: 15 }), "thirty fifteen");
+  t.is(score({ Server: 0, Receiver: 40 }), "love forty");
+});
+
+test("Deuce is presented as deuce", (t) => {
+  t.is(score({ Server: 40, Receiver: 40 }), "deuce");
+});
+
+test("Single player presentation is correct", (t) => {
+  t.is(score({ Server: "AD", Receiver: 0 }), "advantage, server");
+  t.is(score({ Server: 0, Receiver: "GAME" }), "game, receiver");
+});
