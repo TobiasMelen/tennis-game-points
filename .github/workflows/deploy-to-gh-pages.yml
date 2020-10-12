@@ -13,12 +13,9 @@ jobs:
           persist-credentials: false
 
       - name: Install and build
-        env:
-          FIREBASE_API_TOKEN: ${{ secrets.FIREBASE_API_TOKEN }}
-          FIREBASE_APP_ID: ${{ secrets.FIREBASE_APP_ID }}
         run: |
           yarn install
-          FIREBASE_API_TOKEN="$FIREBASE_API_TOKEN" FIREBASE_APP_ID='"$FIREBASE_APP_ID"' yarn run parcel build src/index.html --public-url /${{ github.event.repository.name }}/
+          FIREBASE_API_TOKEN=${{ secrets.FIREBASE_API_TOKEN }} FIREBASE_APP_ID='${{ secrets.FIREBASE_APP_ID }}' yarn run parcel build src/index.html --public-url /${{ github.event.repository.name }}/
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@3.6.2
         with:
