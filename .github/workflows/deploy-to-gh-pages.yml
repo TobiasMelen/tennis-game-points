@@ -14,8 +14,10 @@ jobs:
 
       - name: Install and build
         run: |
+          export FIREBASE_API_KEY=${{ secrets.FIREBASE_API_TOKEN }}
+          export FIREBASE_APP_ID=${{ secrets.FIREBASE_APP_ID }}  
           yarn install
-          FIREBASE_API_TOKEN=${{ secrets.FIREBASE_API_TOKEN }} FIREBASE_APP_ID='${{ secrets.FIREBASE_APP_ID }}' yarn run parcel build src/index.html --no-cache --public-url /${{ github.event.repository.name }}/
+          yarn run parcel build src/index.html --no-cache --public-url /${{ github.event.repository.name }}/
       - name: Deploy
         uses: JamesIves/github-pages-deploy-action@3.6.2
         with:
