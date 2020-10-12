@@ -19,6 +19,10 @@ yarn test
 yarn build
 ```
 
+## Firebase integration
+
+Firebase is used for persistence and sharing of games. To enable firebase the environments variables `FIREBASE_API_TOKEN` and `FIREBASE_APP_ID` must be set and point to a firebase project with a default firestore db. `env.local` can be used for this. The code will fallback to local only if these variables are missing.
+
 ## Development notes
 
 Uses `parcel` for bundling and `ava` for test. I had to muck around a bit with babel to get support for typescript in both.
