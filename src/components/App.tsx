@@ -3,14 +3,24 @@ import React, {
   CSSProperties,
   PropsWithChildren,
   useCallback,
+  useEffect,
   useMemo,
   useState,
 } from "react";
 import transitionChildren from "../hooks-n-hocs/transitionChildren";
+import useFirestorePersistence from "../hooks-n-hocs/useFirestorePersistence";
+import useGameRouting from "../hooks-n-hocs/useGameRouting";
 import useGameStateSoundFX from "../hooks-n-hocs/useGameStateSoundFX";
-import useResettableReducer from "../hooks-n-hocs/useResettableReducer";
+import useReducerDispatch from "../hooks-n-hocs/useReducerDispatch";
 import useWindowTitle from "../hooks-n-hocs/useWindowTitle";
-import { GameScore, getGameStatus, Player, pointWonBy } from "../tennisScoring";
+import {
+  GameScore,
+  GameState,
+  getGameStatus,
+  Player,
+  pointWonBy,
+} from "../tennisScoring";
+import { sourcePropEquals } from "../utils";
 import Block from "./Block";
 import Button from "./Button";
 import MainContainer from "./MainContainer";
@@ -23,16 +33,33 @@ const formatScore = (score: GameScore) =>
     ? new String(score).padStart(2, "0")
     : score.toString();
 
+const initialScores: GameState = { server: 0, receiver: 0 };
+
 export default function App() {
-  const [scores, addPointTo, reset] = useResettableReducer(pointWonBy, {
-    Server: 0,
-    Receiver: 0,
-  });
+  const [gameState, setGameState] = useState(initialScores);
+  const addPointTo = useReducerDispatch(pointWonBy, gameState, setGameState);
+
+  const [gameId, setGameId] = useGameRouting();
+  const reset = useCallback(() => {
+    setGameId();
+    setGameState(initialScores);
+  }, []);
+  const fireStoreGame = useFirestorePersistence(gameState, gameId);
+  //update game if firestore brings new info
+  useEffect(() => {
+    if (fireStoreGame != null) {
+      setGameId(fireStoreGame.id);
+      //only update from firebase if firebase data diffs to local
+      setGameState((state) =>
+        sourcePropEquals(state, fireStoreGame) ? state : fireStoreGame
+      );
+    }
+  }, [fireStoreGame]);
 
   const [gameOver, gameNotStarted] = useMemo(() => {
-    const status = getGameStatus(scores);
+    const status = getGameStatus(gameState);
     return [status === "GAME_OVER", status === "NOT_STARTED"];
-  }, [scores]);
+  }, [gameState]);
 
   const pointAwarder = (player: Player) => () =>
     !gameOver && addPointTo(player);
@@ -47,22 +74,22 @@ export default function App() {
   );
 
   const [serverScore, receiverScore] = [
-    formatScore(scores.Server),
-    formatScore(scores.Receiver),
+    formatScore(gameState.server),
+    formatScore(gameState.receiver),
   ];
   useWindowTitle(gameOver ? "GAME" : `${serverScore} : ${receiverScore}`);
 
   const [soundEnabled, setSoundEnabled] = useState(true);
-  useGameStateSoundFX(soundEnabled, scores);
+  useGameStateSoundFX(soundEnabled, gameState);
   return (
     <MainContainer>
       <SoundToggler status={soundEnabled} toggle={setSoundEnabled} />
       {/**Empty div for flexbox hacking */}
       <div />
       <Block>
-        <ScoreboardSection {...scoreProps("Server", serverScore)} />
+        <ScoreboardSection {...scoreProps("server", serverScore)} />
         <ScoreboardSection>{gameOver ? "GAME" : ":"}</ScoreboardSection>
-        <ScoreboardSection {...scoreProps("Receiver", receiverScore)} />
+        <ScoreboardSection {...scoreProps("receiver", receiverScore)} />
       </Block>
       <Block>
         <Button onClick={reset} invisible={gameNotStarted}>

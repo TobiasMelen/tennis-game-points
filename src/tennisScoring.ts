@@ -7,8 +7,8 @@ export type GameScore = 0 | 15 | 30 | 40 | "AD" | "GAME";
 
 /** Game state for a tennis game */
 export type GameState = {
-  Server: GameScore;
-  Receiver: GameScore;
+  server: GameScore;
+  receiver: GameScore;
 };
 
 /** Game state validated as ongoing (no one has won yet) */
@@ -39,7 +39,7 @@ export const getGameStatus = (gameState: GameState) => {
 
 /** Get opponent role for player, this func is banking it on 3 person tennis never happening */
 export const opponentOf = (player: Player): Player =>
-  player === "Server" ? "Receiver" : "Server";
+  player === "server" ? "receiver" : "server";
 
 /** Increment score by one point for selected player */
 export const pointWonBy = (gameState: GameState, player: Player) => {
@@ -99,14 +99,14 @@ const individualPresentationScores: GameScore[] = ["GAME", "AD"];
 
 export const score = (gameState: GameState) => {
   //Score to be presented as "score" all...
-  if (gameState.Server === gameState.Receiver) {
+  if (gameState.server === gameState.receiver) {
     //...if not love all, where we'll stay quiet...
-    return gameState.Server === 0
+    return gameState.server === 0
       ? ""
       : //...or deuce, where we'll say "Deuce"
-      gameState.Server === 40
+      gameState.server === 40
       ? "deuce"
-      : `${translations[gameState.Server]} all`;
+      : `${translations[gameState.server]} all`;
   }
   //If score where only one player is to be presented
   const [player, score] =
@@ -116,8 +116,8 @@ export const score = (gameState: GameState) => {
   if (player && score) {
     return `${translations[score]}, ${player.toLowerCase()}`;
   }
-  return `${translations[gameState.Server]} ${
-    translations[gameState.Receiver]
+  return `${translations[gameState.server]} ${
+    translations[gameState.receiver]
   }`;
 };
 
