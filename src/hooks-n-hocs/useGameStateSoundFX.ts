@@ -69,7 +69,7 @@ export default function useGameStateSoundFX(
       const utterance = new SpeechSynthesisUtterance(scorePresentation);
       utterance.volume = 0.2;
       utterance.lang = "en-GB";
-      utterance.rate = 1.1;
+      utterance.rate = 1;
       speech.speak(utterance);
     }, 1000);
     return () => clearTimeout(announceDelay);

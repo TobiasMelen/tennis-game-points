@@ -9,10 +9,10 @@ import {
 } from "./tennisScoring";
 
 //Opponent brainfart tests
-test("Receiver is opponent to Server", (t) =>
-  t.assert(opponentOf("Receiver") === "Server"));
-test("Server is opponent to Receiver", (t) =>
-  t.assert(opponentOf("Server") === "Receiver"));
+test("receiver is opponent to server", (t) =>
+  t.assert(opponentOf("receiver") === "server"));
+test("server is opponent to receiver", (t) =>
+  t.assert(opponentOf("server") === "receiver"));
 
 //Factory HoF to create pointwinner for specified player from provided state.
 const pointWinForPlayer = (player: Player) => (
@@ -30,7 +30,7 @@ const pointWinForPlayer = (player: Player) => (
 };
 
 //Scoring tests, run for both players.
-for (const player of ["Server", "Receiver"] as const) {
+for (const player of ["server", "receiver"] as const) {
   const playerPointWinAt = pointWinForPlayer(player);
   const basicIncrementTest = (
     currentScore: GameScore,
@@ -69,15 +69,15 @@ for (const player of ["Server", "Receiver"] as const) {
 
 //Score presentaion tests
 test("Scores are presented in correct order", (t) => {
-  t.is(score({ Server: 30, Receiver: 15 }), "thirty fifteen");
-  t.is(score({ Server: 0, Receiver: 40 }), "love forty");
+  t.is(score({ server: 30, receiver: 15 }), "thirty fifteen");
+  t.is(score({ server: 0, receiver: 40 }), "love forty");
 });
 
 test("Deuce is presented as deuce", (t) => {
-  t.is(score({ Server: 40, Receiver: 40 }), "deuce");
+  t.is(score({ server: 40, receiver: 40 }), "deuce");
 });
 
 test("Single player presentation is correct", (t) => {
-  t.is(score({ Server: "AD", Receiver: 0 }), "advantage, server");
-  t.is(score({ Server: 0, Receiver: "GAME" }), "game, receiver");
+  t.is(score({ server: "AD", receiver: 0 }), "advantage, server");
+  t.is(score({ server: 0, receiver: "GAME" }), "game, receiver");
 });
