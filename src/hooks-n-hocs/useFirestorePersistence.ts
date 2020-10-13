@@ -53,8 +53,7 @@ export default function useFirestorePersistence<TState>(
     const unsub = getCollection()
       .doc(id)
       .onSnapshot((doc) => {
-        //Google has this weird but consistent habit of writing shit code.
-        //In this case it's broken type declartions, no way to specify collection type generically.
+        //Broken type declartions, no way to specify collection type generically.
         const data = doc.data() as TState;
 
         data &&
