@@ -1,17 +1,9 @@
-import React, {
-  ComponentProps,
-  CSSProperties,
-  PropsWithChildren,
-  useCallback,
-  useEffect,
-  useMemo,
-  useState,
-} from "react";
-import transitionChildren from "../hooks-n-hocs/transitionChildren";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import useFirestorePersistence from "../hooks-n-hocs/useFirestorePersistence";
 import useGameRouting from "../hooks-n-hocs/useGameRouting";
 import useGameStateSoundFX from "../hooks-n-hocs/useGameStateSoundFX";
 import useReducerDispatch from "../hooks-n-hocs/useReducerDispatch";
+import useShallowComparedState from "../hooks-n-hocs/useShallowComparedState";
 import useWindowTitle from "../hooks-n-hocs/useWindowTitle";
 import {
   GameScore,
@@ -36,51 +28,63 @@ const formatScore = (score: GameScore) =>
 const initialScores: GameState = { server: 0, receiver: 0 };
 
 export default function App() {
-  const [gameState, setGameState] = useState(initialScores);
-  const addPointTo = useReducerDispatch(pointWonBy, gameState, setGameState);
-
+  //state of game
+  const [gameState, setGameState] = useShallowComparedState(initialScores);
+  //dispatch to reducing by pointWonBy
+  const addPointTo = useReducerDispatch(pointWonBy, setGameState);
+  //routed id of game, set by firebase
   const [gameId, setGameId] = useGameRouting();
-  const reset = useCallback(() => {
-    setGameId();
-    setGameState(initialScores);
-  }, []);
-  const fireStoreGame = useFirestorePersistence(gameState, gameId);
+  //if user navigates away from all games, reset score
+  useEffect(() => {
+    if (gameId == null) {
+      setGameState(initialScores);
+    }
+  }, [gameId]);
+  //persist gamestate to firebase game collection
+  const [firestoreId, firestoreGame] = useFirestorePersistence(
+    "games",
+    gameState,
+    gameId,
+    () =>
+      //don't save state if games not started and i'ts not connected yet
+      !gameNotStarted && !gameId
+  );
+
   //update game if firestore brings new info
   useEffect(() => {
-    if (fireStoreGame != null) {
-      setGameId(fireStoreGame.id);
-      //only update from firebase if firebase data diffs to local
-      setGameState((state) =>
-        sourcePropEquals(state, fireStoreGame) ? state : fireStoreGame
-      );
-    }
-  }, [fireStoreGame]);
+    firestoreGame && setGameState(firestoreGame);
+    firestoreId && setGameId(firestoreId);
+  }, [firestoreGame, firestoreId]);
 
+  //make booleans of gamestatus for less clutter later
   const [gameOver, gameNotStarted] = useMemo(() => {
     const status = getGameStatus(gameState);
     return [status === "GAME_OVER", status === "NOT_STARTED"];
   }, [gameState]);
 
-  const pointAwarder = (player: Player) => () =>
-    !gameOver && addPointTo(player);
-
+  //Props for scoreboard components
   const scoreProps = useCallback(
     (player: Player, score: string) => ({
-      onClick: pointAwarder(player),
+      onClick: () => !gameOver && addPointTo(player),
       style: { cursor: "pointer" },
       children: !gameOver && score,
     }),
-    [pointAwarder, gameOver]
+    [addPointTo, gameOver]
   );
 
+  //Score formatted for display. Why I didn't just have strings in the state from the get go? Very good question.
   const [serverScore, receiverScore] = [
     formatScore(gameState.server),
     formatScore(gameState.receiver),
   ];
+
+  //Set gamestate to title of window
   useWindowTitle(gameOver ? "GAME" : `${serverScore} : ${receiverScore}`);
 
+  //FX
   const [soundEnabled, setSoundEnabled] = useState(true);
   useGameStateSoundFX(soundEnabled, gameState);
+
   return (
     <MainContainer>
       <SoundToggler status={soundEnabled} toggle={setSoundEnabled} />

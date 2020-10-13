@@ -14,14 +14,13 @@ import {
  */
 export default function useReducerDispatch<R extends Reducer<any, any>>(
   reducer: R,
-  state: ReducerState<R>,
   setState: Dispatch<SetStateAction<ReducerState<R>>>
 ) {
   const dispatch = useCallback(
     (action: ReducerAction<R>) => {
       setState((state) => reducer(state, action));
     },
-    [state]
+    [setState]
   );
   return dispatch;
 }
