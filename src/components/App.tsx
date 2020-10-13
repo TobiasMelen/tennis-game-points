@@ -29,6 +29,9 @@ const initialScores: GameState = { server: 0, receiver: 0 };
 export default function App() {
   //state of game
   const [gameState, setGameState] = useShallowComparedState(initialScores);
+  //get current status of game
+  const status = getGameStatus(gameState);
+  const gameOver = status === "GAME_OVER";
   //dispatch to reducing by pointWonBy
   const addPointTo = useReducerDispatch(pointWonBy, setGameState);
   //routed id of game, set by firebase
@@ -39,14 +42,15 @@ export default function App() {
       setGameState(initialScores);
     }
   }, [gameId]);
+
   //persist gamestate to firebase game collection
   const [firestoreId, firestoreGame] = useFirestorePersistence(
     "games",
     gameState,
     gameId,
-    () =>
-      //don't save state if games not started and i'ts not connected yet
-      !gameNotStarted && !gameId
+    (firestoreData) =>
+      //Persist state only if the game is started or an firebase entity is already connected.
+      firestoreData != null || status === "ONGOING"
   );
 
   //update game if firestore brings new info
@@ -54,22 +58,6 @@ export default function App() {
     firestoreGame && setGameState(firestoreGame);
     firestoreId && setGameId(firestoreId);
   }, [firestoreGame, firestoreId]);
-
-  //make booleans of gamestatus for less clutter later
-  const [gameOver, gameNotStarted] = useMemo(() => {
-    const status = getGameStatus(gameState);
-    return [status === "GAME_OVER", status === "NOT_STARTED"];
-  }, [gameState]);
-
-  //Props for scoreboard components
-  const scoreProps = useCallback(
-    (player: Player, score: string) => ({
-      onClick: () => !gameOver && addPointTo(player),
-      style: { cursor: "pointer" },
-      children: !gameOver && score,
-    }),
-    [addPointTo, gameOver]
-  );
 
   //Score formatted for display. Why I didn't just have strings in the state from the get go? Very good question.
   const [serverScore, receiverScore] = [
@@ -84,6 +72,16 @@ export default function App() {
   const [soundEnabled, setSoundEnabled] = useState(true);
   useGameStateSoundFX(soundEnabled, gameState);
 
+  //Props for scoreboard components
+  const scoreProps = useCallback(
+    (player: Player, score: string) => ({
+      onClick: () => !gameOver && addPointTo(player),
+      style: { cursor: "pointer" },
+      children: !gameOver && score,
+    }),
+    [addPointTo, gameOver]
+  );
+
   return (
     <MainContainer>
       <SoundToggler status={soundEnabled} toggle={setSoundEnabled} />
@@ -97,7 +95,7 @@ export default function App() {
       <Block>
         <FadingButton
           onClick={() => setGameState(initialScores)}
-          invisible={gameNotStarted}
+          invisible={status === "NOT_STARTED"}
         >
           {gameOver ? "Reset Game" : "Reset Scores"}
         </FadingButton>
