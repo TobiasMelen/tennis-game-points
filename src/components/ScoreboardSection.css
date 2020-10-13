@@ -3,11 +3,11 @@
   -webkit-background-clip: text;
   color: transparent;
   font-size: 10em;
-  text-shadow: 3px 3px 3px white;
+  text-shadow: 0.01em 0.01em 0.01em white;
   background-color: #aaa;
   font-weight: 900;
   font-family: monospace;
-  -webkit-text-stroke: 1px #eee;
+  -webkit-text-stroke: 0.003em #eee;
   transition: opacity 100ms linear, transform 100ms ease-out;
   user-select: none;
 }

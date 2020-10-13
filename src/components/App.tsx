@@ -12,9 +12,8 @@ import {
   Player,
   pointWonBy,
 } from "../tennisScoring";
-import { sourcePropEquals } from "../utils";
 import Block from "./Block";
-import Button from "./Button";
+import Button, { FadingButton } from "./Button";
 import MainContainer from "./MainContainer";
 import ScoreboardSection from "./ScoreboardSection";
 import SoundToggler from "./SoundToggler";
@@ -96,9 +95,12 @@ export default function App() {
         <ScoreboardSection {...scoreProps("receiver", receiverScore)} />
       </Block>
       <Block>
-        <Button onClick={reset} invisible={gameNotStarted}>
-          {gameOver ? "New Game" : "Reset scores"}
-        </Button>
+        <FadingButton
+          onClick={() => setGameState(initialScores)}
+          invisible={gameNotStarted}
+        >
+          {gameOver ? "Reset Game" : "Reset Scores"}
+        </FadingButton>
       </Block>
     </MainContainer>
   );
