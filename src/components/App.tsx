@@ -68,14 +68,19 @@ export default function App() {
   //Set gamestate to title of window
   useWindowTitle(gameOver ? "GAME" : `${serverScore} : ${receiverScore}`);
 
+  //Keep track of user interaction, sounds cannot be played before user has interacted.
+  const [hasInteraction, setHasInteraction] = useState(false);
   //FX
   const [soundEnabled, setSoundEnabled] = useState(true);
-  useGameStateSoundFX(soundEnabled, gameState);
+  useGameStateSoundFX(soundEnabled && hasInteraction, gameState);
 
   //Props for scoreboard components
   const scoreProps = useCallback(
     (player: Player, score: string) => ({
-      onClick: () => !gameOver && addPointTo(player),
+      onClick: () => {
+        setHasInteraction(true);
+        !gameOver && addPointTo(player);
+      },
       style: { cursor: "pointer" },
       children: !gameOver && score,
     }),
